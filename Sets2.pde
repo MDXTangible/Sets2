@@ -1,4 +1,7 @@
-// import the TUIO library
+// import the TUIO library]
+
+// Test Change by Bob.
+
 import TUIO.*;
 
 import java.util.Comparator;
