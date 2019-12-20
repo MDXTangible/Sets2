@@ -26,10 +26,10 @@ class Parser {
   ArrayList<Expr> parse(ArrayList<MathsSym> tokens) {
     ExprStack stack = new ExprStack();
     stack.init();
-    return parseExp(tokens.iterator(), stack);
+    return parseExp(tokens.iterator(), stack, 0);
   }
 
-  ArrayList<Expr> parseExp(Iterator<MathsSym> tokens, ExprStack stack) {
+  ArrayList<Expr> parseExp(Iterator<MathsSym> tokens, ExprStack stack, int depth) {
     // Nothing left to parse
     
     if (!tokens.hasNext()) {
@@ -54,7 +54,7 @@ class Parser {
       // within an expr
       stack.push(n); // Just push it.
       accumulate(stack);
-      return parseExp(tokens, stack);
+      return parseExp(tokens, stack, depth);
     }
     if (token.isBinOp()) {
 
@@ -71,18 +71,18 @@ class Parser {
       e.left=stack.pop();
 
       stack.push(e);
-      return parseExp(tokens, stack);
+      return parseExp(tokens, stack, depth);
     }
     if (token.isUnaryOp()){
       UnaryExpr e = new UnaryExpr();
       e.op=token.text;
       stack.push(e);
-      return parseExp(tokens, stack);
+      return parseExp(tokens, stack, depth);
     }
     if (token.isOpen()) {
       // push something?
       // a bracket?
-      Expr e = parseSubExp(tokens);
+      Expr e = parseSubExp(tokens, depth);
       //Log("Got subExpr: "+e + " S: "+stack.stack);
       if (e==null) {
         return null;
@@ -90,7 +90,7 @@ class Parser {
 
         stack.push(e);
         accumulate(stack); // do we need this here?
-        parseExp(tokens, stack); // back from the brackets now - so do the rest. 
+        parseExp(tokens, stack, depth+1); // back from the brackets now - so do the rest. 
         return stack.stack;
       }
     }
@@ -110,11 +110,11 @@ class Parser {
     return null;
   }
 
-  Expr parseSubExp(Iterator<MathsSym> tokens) {
+  Expr parseSubExp(Iterator<MathsSym> tokens, int depth) {
     // parse a bracketed expression.
     ExprStack s = new ExprStack();
     s.init();
-    ArrayList<Expr> el= parseExp(tokens, s);
+    ArrayList<Expr> el= parseExp(tokens, s, depth);
     if (el != null && el.size()==1) {
       //Log("parseSubExp: "+el.get(0));
       return el.get(0);

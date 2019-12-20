@@ -21,7 +21,7 @@ abstract class Expr {
   boolean isUnaryExpr() {
     return false;
   } 
- 
+
   boolean isNumExpr() {
     return false;
   }
@@ -73,6 +73,13 @@ abstract class Expr {
     Collections.sort(l);
     return l;
   }
+
+  abstract void drawSet(color inCol, color outCol, SetContext ctxt);
+  // drawSet() is an attempt to draw and shade the Venn diag in a cleverer way.
+  // Haven't figured out how to do it. 
+  // Need some representation of sets 
+  // to which Union, Intersection etc can be applied. I.e. some way of 
+  // representing the region in an intersection.
 }
 
 
@@ -109,16 +116,22 @@ class NameExpr extends Expr implements Comparable {
   }
 
   void drawCircle() {
-    pushStyle();
+    push();
     ellipseMode(CENTER);
     textAlign(CENTER, CENTER);
-    
+
     noFill();
     strokeWeight(2);
     stroke(0);
     ellipse(xLoc, yLoc, cRad, cRad);
+    fill(0);
     text(name, xLoc, yLoc-10);
-    popStyle();
+    pop();
+  }
+
+  void drawSet(color inCol, color outCol, SetContext ctxt) {
+    fill(inCol);
+    ellipse(xLoc, yLoc, cRad, cRad);
   }
 
   boolean contains(int x, int y) {
@@ -157,6 +170,21 @@ class BinExpr extends Expr {
     return a;
   }
 
+  void drawSet(color inCol, color outCol, SetContext ctxt) {
+    if(op == UNION){
+    
+    left.drawSet( inCol, outCol, ctxt);
+    right.drawSet( inCol, outCol, ctxt);
+    } else if (op==DIFF){ 
+    left.drawSet( inCol, outCol, ctxt);
+    right.drawSet( outCol, 0, ctxt);
+    }else if (op==INTER){ 
+    left.drawSet(  outCol, inCol, ctxt);
+    right.drawSet( outCol, inCol, ctxt);
+    }
+  }
+
+
   boolean contains(int x, int y) {
     boolean r=false;
     if (isComplete()) {
@@ -187,7 +215,7 @@ class UnaryExpr extends Expr {
     return 
       " " + op + " " +  exp+" ";
   }
-  
+
   boolean isUnaryExpr() {
     return true;
   }
@@ -197,10 +225,16 @@ class UnaryExpr extends Expr {
 
   HashSet<NameExpr> getNames() {
     HashSet<NameExpr> ns = new HashSet<NameExpr>();
-    if(isComplete()){
-    ns =  exp.getNames(); }
-    else {   }
+    if (isComplete()) {
+      ns =  exp.getNames();
+    } else {
+    }
     return ns;
+  }
+
+  void drawSet(color inCol, color outCol, SetContext ctxt) {
+    fill(inCol);
+    exp.drawSet( inCol, outCol, ctxt);
   }
 
   boolean contains(int x, int y) {

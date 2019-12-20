@@ -8,10 +8,9 @@ class MathsSym {
   }
 
   void draw() {
-
     pushStyle();
-    stroke(255, 150, 150, 100);
-    fill(0);
+    //stroke(255, 0, 0);
+    //fill(0);
     textSize(40);
     textAlign(CENTER, CENTER);
     pushMatrix();
@@ -20,13 +19,14 @@ class MathsSym {
       (int)Calibration.transformX(x), 
       (int)Calibration.transformY(y));
 
+    // Show symbs all in a line:
     //translate(
     //  (int)Calibration.transformX(x), symbolLine);
 
     rect(0, 0, 2*size, 2*size, rad, rad, rad, rad);
     popMatrix();
 
-    fill(0);
+    fill(255);
     text(text, (int)Calibration.transformX(x), (int)Calibration.transformY(y));
     //text(text, (int)Calibration.transformX(x), symbolLine);
     popStyle();

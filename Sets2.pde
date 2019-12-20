@@ -32,8 +32,6 @@ boolean drawObjs = true;
 PFont f;
 String buffer = "";
 
-
-
 boolean changed=true;
 
 void setup() {
@@ -84,7 +82,7 @@ void drawScreen() {
   //textSize(24);
   //text("TYPE AN EXPRESSION", 650, 300);
   //textFont(f);  
-  fill(10);  
+  //fill(10);  
   //text(stored, textPosX1 + 100, textPosY + 100);
 
   if (drawObjs) { // 
@@ -92,14 +90,6 @@ void drawScreen() {
       to.draw();
     }
   }
-  //text(buffer, 200, 200); 
-  push();
-  fill(255);
-  strokeWeight(1);
-  stroke(10);
-  //rect
-  rect(width/2, height/2+topInset/2, width-2*inset, height-(inset+topInset));
-  pop();
 
   if (expressions==null) {
     fill(0);
@@ -110,36 +100,46 @@ void drawScreen() {
     } else {
 
       // show expressions and work out locations of circles
-      for (int i=0; i<expressions.size(); i++ ) {
+      int numExprs = expressions.size();
+      for (int i=0; i<numExprs; i++ ) {
         Expr e = expressions.get(i);
         //textAlign(CENTER, CENTER);
 
         textAlign(CENTER, BOTTOM);
-        text(e.toString(), (int)((i +0.5)* width/expressions.size()), textPosY);
-        e.calcCircles( (int)((i +0.5)* width/expressions.size()), height/2);
+        text(e.toString(), (int)((i +0.5)* width/numExprs), textPosY);
+        e.calcCircles( (int)((i +0.5)* width/numExprs), height/2);
       }
-push();
-stroke(fillColour);
+
+      stroke(fillColour);
+      //long t=millis();
       // draw all the circle fills
-      for (int i =inset; i<width-inset; i++) {
-        for (int j = topInset; j<height-inset; j++) {
-          for (Expr e : expressions) {
+      //for (Expr e : expressions) {
+      for (int eNum=0; eNum<numExprs; eNum++ ) {
+        Expr e = expressions.get(eNum);
+      push();
+        //noFill();
+        fill(255);
+        stroke(0);
+        rectMode(CORNER);
+        rect((eNum * width/numExprs)+inset, topInset, (width/numExprs)-(2*inset), (height-topInset)-inset);
+        pop();
+        loadPixels();
+        for (int i =(eNum * width/numExprs)+inset; i<((eNum+1) * width/numExprs)-inset; i++) {
+          for (int j = topInset; j<height-inset; j++) {
+
             if (e.contains(i, j)) {
-              point(i, j);
+              pixels[i+j*width]=fillColour;
+              //point(i, j);
             }
           }
         }
-      }
-      pop();
-
-      // draw the circle outlines
-      for (Expr e : expressions) {
-        e.drawCircles();
-      }
-       // textSize (20);
-        fill(0);
-        text("Current input:" + "" + buffer , width/2, height-50); 
+        updatePixels();
         
+        e.drawCircles();
+  
+      }
+      fill(0);
+      text("Current input:" + "" + buffer, width/2, height-50);
     }
   }
 }
@@ -243,7 +243,7 @@ void keyPressed() {
       if (key == ENTER) { 
         // Insert spaces around parentheses:
         buffer=buffer.replaceAll("\\(", " ( ").replaceAll("\\)", " ) ");
-        
+
         // split with a reg exp to catch multiple whitespace characters:
         String[] splitString = buffer.split("\\s+");
 
@@ -269,7 +269,7 @@ void keyPressed() {
            o.text=capText;
            break;
            }*/
-//
+          //
           o.text=capText;
           //o.x=200;
           //o.y=200;
@@ -278,7 +278,7 @@ void keyPressed() {
 
         updateExpressions();
         changed=true;
-        
+
         // Set the buffer to empty if we dom't want to be able to edit it:
         //buffer = "";
       } else {    
