@@ -28,6 +28,10 @@ abstract class Expr {
   boolean isNameExpr() {
     return false;
   }
+  boolean isOpenBracket() {
+    return false;
+  }
+  
   boolean isComplete() {
     return true;
   }
@@ -75,11 +79,6 @@ abstract class Expr {
   }
 
   abstract void drawSet(color inCol, color outCol, SetContext ctxt);
-  // drawSet() is an attempt to draw and shade the Venn diag in a cleverer way.
-  // Haven't figured out how to do it. 
-  // Need some representation of sets 
-  // to which Union, Intersection etc can be applied. I.e. some way of 
-  // representing the region in an intersection.
 }
 
 
@@ -103,7 +102,6 @@ class NameExpr extends Expr implements Comparable {
   String toString() {
     return name;
   }
-
 
   HashSet<NameExpr> getNames() {
     HashSet a =  new HashSet();
@@ -156,7 +154,7 @@ class BinExpr extends Expr {
     return true;
   }
   boolean isComplete() {
-    return (left!=null && op !=null && right !=null);// text if left & right complete?
+    return (left!=null && op !=null && right !=null  && left.isComplete() && right.isComplete());// text if left & right complete?
   }
 
   HashSet<NameExpr> getNames() {
@@ -171,16 +169,16 @@ class BinExpr extends Expr {
   }
 
   void drawSet(color inCol, color outCol, SetContext ctxt) {
-    if(op == UNION){
-    
-    left.drawSet( inCol, outCol, ctxt);
-    right.drawSet( inCol, outCol, ctxt);
-    } else if (op==DIFF){ 
-    left.drawSet( inCol, outCol, ctxt);
-    right.drawSet( outCol, 0, ctxt);
-    }else if (op==INTER){ 
-    left.drawSet(  outCol, inCol, ctxt);
-    right.drawSet( outCol, inCol, ctxt);
+    if (op == UNION) {
+
+      left.drawSet( inCol, outCol, ctxt);
+      right.drawSet( inCol, outCol, ctxt);
+    } else if (op==DIFF) { 
+      left.drawSet( inCol, outCol, ctxt);
+      right.drawSet( outCol, 0, ctxt);
+    } else if (op==INTER) { 
+      left.drawSet(  outCol, inCol, ctxt);
+      right.drawSet( outCol, inCol, ctxt);
     }
   }
 
@@ -243,5 +241,31 @@ class UnaryExpr extends Expr {
       r=!exp.contains(x, y); // actually, should we negate this? As it's complement
     }
     return r;
+  }
+}
+
+class OpenBracket extends Expr {
+  // A hack - allows the parser to push an open bracket 
+  //  onto the expression stack
+
+  void drawSet(color inCol, color outCol, SetContext ctxt) {
+  }
+  String toString() { 
+    return " ( ";
+  }
+
+  boolean contains(int x, int y) { 
+    return false;
+  }
+  HashSet<NameExpr> getNames() { 
+    return (new HashSet());
+  }
+  
+  boolean isOpenBracket() {
+    return true;
+  }
+  
+    boolean isComplete() {
+    return false;
   }
 }

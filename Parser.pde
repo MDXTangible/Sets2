@@ -1,4 +1,5 @@
 class Parser {
+
   // Expr = BinExpr | Name | ( Expr ) |... 
   // BinExpr = Expr Op Expr
   // Name = A | B | ....
@@ -31,11 +32,13 @@ class Parser {
 
   ArrayList<Expr> parseExp(Iterator<MathsSym> tokens, ExprStack stack, int depth) {
     // Nothing left to parse
-    
-    if (!tokens.hasNext()) {
+    //Log("Parsing: " +tokens);
+    if (!tokens.hasNext()) { 
+
       Log("At End : "+stack);
+
       if (stack.hasError()) { // incomplete expr
-      Log("Err: ");
+        Log("Err: ");
         return null;
       } else {
         accumulate(stack); // why accumulate?
@@ -55,15 +58,23 @@ class Parser {
       stack.push(n); // Just push it.
       accumulate(stack);
       return parseExp(tokens, stack, depth);
-    }
-    if (token.isBinOp()) {
+    } else if (token.isBinOp()) {
 
       //Log("BinOp:"+token);
-      if (stack.hasError()) { 
-        // if empty, then we're starting with a BinOp
-        // if top is not complete, then we've got two successive BinOps
+      //if (stack.hasError()) { 
+      //if empty, then we're starting with a BinOp
+      //if top is not complete, then we've got two successive BinOps
 
-        Log("Null");
+      //Log("Null:"+stack);
+      //return null;
+      //}
+
+      if (stack.isEmpty()) { 
+        Log("No Left Op"); 
+        return null;
+      }
+      if (!stack.top().isComplete()) { 
+        Log("Incomplete Left Op"); 
         return null;
       }
       BinExpr e = new BinExpr();
@@ -72,54 +83,62 @@ class Parser {
 
       stack.push(e);
       return parseExp(tokens, stack, depth);
-    }
-    if (token.isUnaryOp()){
+    } else if (token.isUnaryOp()) {
       UnaryExpr e = new UnaryExpr();
       e.op=token.text;
       stack.push(e);
       return parseExp(tokens, stack, depth);
-    }
-    if (token.isOpen()) {
+    } else if (token.isOpen()) {
       // push something?
       // a bracket?
-      Expr e = parseSubExp(tokens, depth);
-      //Log("Got subExpr: "+e + " S: "+stack.stack);
-      if (e==null) {
-        return null;
-      } else {
+      Expr e = new OpenBracket();
+      stack.push(e);
+      //accumulate(stack); // do we need this here?
+      return parseExp(tokens, stack, depth+1); // back from the brackets now - so do the rest. 
+      //return stack.stack;
+    } else if (token.isClose()) {
+      Log("Close :"+stack.stack);
 
-        stack.push(e);
-        accumulate(stack); // do we need this here?
-        parseExp(tokens, stack, depth+1); // back from the brackets now - so do the rest. 
-        return stack.stack;
+      if (!processBracketExpr(stack)) { 
+        Log("Unmatched Brackets:"+stack.stack);
+        return null;
       }
-    }
 
-    if (token.isClose()) {
-
-      //Log("Close :"+stack.stack);
-      accumulate(stack);
-      
+      parseExp(tokens, stack, depth+1);
+      Log("Processed close :"+stack.stack);
+      accumulate(stack);  
       //Log("Close-:"+stack.stack);
-      if (stack.hasError()){
+      if (stack.hasError()) {
         return null;
       } else {
-      return stack.stack;
+        return stack.stack;
       }
     }
     return null;
   }
 
-  Expr parseSubExp(Iterator<MathsSym> tokens, int depth) {
-    // parse a bracketed expression.
-    ExprStack s = new ExprStack();
-    s.init();
-    ArrayList<Expr> el= parseExp(tokens, s, depth);
-    if (el != null && el.size()==1) {
-      //Log("parseSubExp: "+el.get(0));
-      return el.get(0);
-    } else { 
-      return null;
+  boolean processBracketExpr(ExprStack stack) {
+    // just got a close bracket.
+    // Need to pop until we get a corresponding open
+    // Then push everything back on.
+    int s = stack.size();
+    if (s<2) { 
+      return false;
+    } else {
+      Expr e1 = stack.pop();
+      Expr e2 = stack.pop();
+      if (e2.isOpenBracket()) {
+        if (e1.isComplete()) {
+          stack.push(e1); 
+          return true;
+        } else { 
+          Log("Incomplete subExpr"); 
+          return false;
+        }
+      } else { 
+        Log("No Open for Close");  
+        return false;
+      }
     }
   }
 
@@ -127,22 +146,24 @@ class Parser {
     // pop some things until we can build a complete expr. Then push this.
     // 
 
-    //Log("A : "+stack);
-    if (stack.size()>=2) {
-      Expr e1=stack.pop(); // should be complete
-      if (stack.top().isBinExpr() && !stack.top().isComplete()) {
-        BinExpr e2=(BinExpr)stack.pop(); // should be incomplete
-        accumulate(stack);
-        e2.right=e1;
-        stack.push(e2);
-      } else if(stack.top().isUnaryExpr() && !stack.top().isComplete()){
-        UnaryExpr e2=(UnaryExpr)stack.pop(); // should be incomplete
-        accumulate(stack);
-        e2.exp=e1;
-        stack.push(e2);
-      } else {  
-        accumulate(stack);
-        stack.push(e1);
+    //Log("Accumulate : "+stack);
+    if (stack.isEmpty() || !stack.top().isOpenBracket()) {
+      if (stack.size()>=2) {
+        Expr e1=stack.pop(); // should be complete
+        if (stack.top().isBinExpr() && !stack.top().isComplete()) {
+          BinExpr e2=(BinExpr)stack.pop(); // should be incomplete
+          accumulate(stack);
+          e2.right=e1;
+          stack.push(e2);
+        } else if (stack.top().isUnaryExpr() && !stack.top().isComplete()) {
+          UnaryExpr e2=(UnaryExpr)stack.pop(); // should be incomplete
+          accumulate(stack);
+          e2.exp=e1;
+          stack.push(e2);
+        } else {  
+          accumulate(stack);
+          stack.push(e1);
+        }
       }
     }
 

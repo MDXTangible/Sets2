@@ -1,4 +1,8 @@
 class MathsSym {
+  // Class of tokens - unparsaed symbols of the set notation
+  // Letters (A, B, C, ...) to stand for sets & operators (union, intersection, etc)
+  // Brackets.
+  
   int x, y;
   String text;
   int size=40;

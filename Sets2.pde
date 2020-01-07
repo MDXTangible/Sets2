@@ -1,6 +1,9 @@
-// import the TUIO library]
+// TUIO Venn Diagrams
+// Bob Fields
 
-// Test Change by Bob.
+
+
+// import the TUIO library
 
 import TUIO.*;
 
@@ -79,12 +82,6 @@ synchronized void draw() {
 void drawScreen() {
   background(255);
 
-  //textSize(24);
-  //text("TYPE AN EXPRESSION", 650, 300);
-  //textFont(f);  
-  //fill(10);  
-  //text(stored, textPosX1 + 100, textPosY + 100);
-
   if (drawObjs) { // 
     for (MathsSym to : objects.values()) {
       to.draw();
@@ -98,7 +95,7 @@ void drawScreen() {
     if (expressions.isEmpty()) {
       text("Empty", width/2, textPosY);
     } else {
-
+      push();
       // show expressions and work out locations of circles
       int numExprs = expressions.size();
       for (int i=0; i<numExprs; i++ ) {
@@ -109,16 +106,16 @@ void drawScreen() {
         text(e.toString(), (int)((i +0.5)* width/numExprs), textPosY);
         e.calcCircles( (int)((i +0.5)* width/numExprs), height/2);
       }
-
+      pop();
       stroke(fillColour);
       //long t=millis();
       // draw all the circle fills
       //for (Expr e : expressions) {
       for (int eNum=0; eNum<numExprs; eNum++ ) {
         Expr e = expressions.get(eNum);
-      push();
+        push();
         //noFill();
-        fill(255);
+        fill(255, 50);
         stroke(0);
         rectMode(CORNER);
         rect((eNum * width/numExprs)+inset, topInset, (width/numExprs)-(2*inset), (height-topInset)-inset);
@@ -129,18 +126,20 @@ void drawScreen() {
 
             if (e.contains(i, j)) {
               pixels[i+j*width]=fillColour;
-              //point(i, j);
             }
           }
         }
         updatePixels();
-        
+
         e.drawCircles();
-  
       }
-      fill(0);
-      text("Current input:" + "" + buffer, width/2, height-50);
     }
+  }
+
+  if (buffer != "") {
+    fill(0);
+    println("Writing input at: "+symbolLine);
+    text("Current input:" + "" + buffer, width/2, symbolLine);
   }
 }
 
@@ -216,9 +215,9 @@ Comparator<MathsSym> comp = new Comparator<MathsSym>() {
   // allows us to sort objects left-to-right.
   public int compare(MathsSym o1, MathsSym o2) {
     if (o1.x<o2.x) { 
-      return -1;
-    } else if (o1.x>o2.x) { 
       return 1;
+    } else if (o1.x>o2.x) { 
+      return -1;
     } else { 
       return 0;
     }
@@ -231,8 +230,12 @@ Comparator<MathsSym> comp = new Comparator<MathsSym>() {
 void keyPressed() {
 
   // Ignore 'special' keys that we don't care about
-  if (keyCode == SHIFT || keyCode == UP || keyCode == DOWN) {
-  } else
+  //if (keyCode == SHIFT || keyCode == UP || keyCode == DOWN) {
+  //} else
+  
+   if (keyCode == BACKSPACE || keyCode == ENTER || key == ' ' 
+   || ((key >= 'a') && (key <= 'z')) || ((key >= 'A') && (key <= 'Z'))) {
+ 
     if (keyCode == BACKSPACE ) {
       //println("BACKSPACE");
       if (buffer.length()>0) {
@@ -287,4 +290,5 @@ void keyPressed() {
       }
 
   Calibration.keyPressed(keyCode, key);
+   }
 }

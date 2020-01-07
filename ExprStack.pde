@@ -2,6 +2,7 @@ class ExprStack {
   // Make into a class
 
   ArrayList<Expr> stack = new ArrayList();
+  
   void init() {
     stack = new ArrayList();
   }
@@ -10,9 +11,11 @@ class ExprStack {
     stack.add(e);
   }
   Expr pop() {
+    //Log("Pop");
     return stack.remove(stack.size()-1);
   }
   Expr top() {
+    //Log("Top");
     return stack.get(stack.size()-1);
   }
   boolean isEmpty() {
@@ -20,7 +23,12 @@ class ExprStack {
   }
   
   boolean hasError(){
-    return isEmpty() || !(top().isComplete());
+    boolean err=false;
+    for(Expr e:stack){
+      if(!e.isComplete()){ err=true; }
+    }
+    Log("Stack: "+ stack + " Err: "+ err);
+    return (isEmpty() || err);
   }
   
   int size(){
