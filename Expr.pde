@@ -11,7 +11,7 @@ abstract class Expr {
 
   // plus: brackets?  Empty
 
-  MathsSym sym; 
+  //MathsSym sym; 
 
   abstract String toString();
 
@@ -100,6 +100,7 @@ class NameExpr extends Expr implements Comparable {
   }
 
   String toString() {
+    //return name+"<"+xLoc+","+yLoc+">";
     return name;
   }
 
@@ -144,12 +145,10 @@ class BinExpr extends Expr {
   Expr right;
 
   String toString() {
-
     String r = (right==null)?"null":right.toString();
-    return "(" + left.toString() + 
-      " " + op + " " + 
-      r+")";
+    return "(" + left.toString() + "" + op + "" + r+")";
   }
+  
   boolean isBinExpr() {
     return true;
   }
@@ -211,7 +210,7 @@ class UnaryExpr extends Expr {
   String toString() {
 
     return 
-      " " + op + " " +  exp+" ";
+      "" + op + "" +  exp+"";
   }
 
   boolean isUnaryExpr() {
@@ -225,8 +224,7 @@ class UnaryExpr extends Expr {
     HashSet<NameExpr> ns = new HashSet<NameExpr>();
     if (isComplete()) {
       ns =  exp.getNames();
-    } else {
-    }
+    } 
     return ns;
   }
 
@@ -237,7 +235,7 @@ class UnaryExpr extends Expr {
 
   boolean contains(int x, int y) {
     boolean r=true;
-    if (isComplete() && op == COMP) {
+    if (isComplete() && op.equals(COMP)) {
       r=!exp.contains(x, y); // actually, should we negate this? As it's complement
     }
     return r;
@@ -251,7 +249,7 @@ class OpenBracket extends Expr {
   void drawSet(color inCol, color outCol, SetContext ctxt) {
   }
   String toString() { 
-    return " ( ";
+    return "*(*";
   }
 
   boolean contains(int x, int y) { 

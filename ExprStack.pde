@@ -27,7 +27,7 @@ class ExprStack {
     for(Expr e:stack){
       if(!e.isComplete()){ err=true; }
     }
-    Log("Stack: "+ stack + " Err: "+ err);
+    //Log("Stack: "+ stack + " Err: "+ err);
     return (isEmpty() || err);
   }
   

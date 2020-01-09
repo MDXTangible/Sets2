@@ -35,7 +35,7 @@ class Parser {
     //Log("Parsing: " +tokens);
     if (!tokens.hasNext()) { 
 
-      Log("At End : "+stack);
+      //Log("At End : "+stack);
 
       if (stack.hasError()) { // incomplete expr
         Log("Err: ");
@@ -59,15 +59,6 @@ class Parser {
       accumulate(stack);
       return parseExp(tokens, stack, depth);
     } else if (token.isBinOp()) {
-
-      //Log("BinOp:"+token);
-      //if (stack.hasError()) { 
-      //if empty, then we're starting with a BinOp
-      //if top is not complete, then we've got two successive BinOps
-
-      //Log("Null:"+stack);
-      //return null;
-      //}
 
       if (stack.isEmpty()) { 
         Log("No Left Op"); 
@@ -97,7 +88,7 @@ class Parser {
       return parseExp(tokens, stack, depth+1); // back from the brackets now - so do the rest. 
       //return stack.stack;
     } else if (token.isClose()) {
-      Log("Close :"+stack.stack);
+      //Log("Close :"+stack.stack);
 
       if (!processBracketExpr(stack)) { 
         Log("Unmatched Brackets:"+stack.stack);
@@ -105,7 +96,7 @@ class Parser {
       }
 
       parseExp(tokens, stack, depth+1);
-      Log("Processed close :"+stack.stack);
+      //Log("Processed close :"+stack.stack);
       accumulate(stack);  
       //Log("Close-:"+stack.stack);
       if (stack.hasError()) {

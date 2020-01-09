@@ -18,6 +18,7 @@ MathsSym m;
 TuioProcessing tuioClient;
 
 HashMap<Integer, String> symbs= new HashMap();
+HashMap<String, String> keySymbMap= new HashMap();
 
 // objects : FidID -> MathSym
 HashMap<Integer, MathsSym> objects = new HashMap<Integer, MathsSym>();
@@ -53,6 +54,8 @@ void setup() {
   symbs.put(10, DIFF);
 
   symbs.put(16, COMP);
+
+  keySymbMap.put("i", "^");
 
   symbs.put(0, "A");
   symbs.put(1, "B");
@@ -106,16 +109,15 @@ void drawScreen() {
         text(e.toString(), (int)((i +0.5)* width/numExprs), textPosY);
         e.calcCircles( (int)((i +0.5)* width/numExprs), height/2);
       }
-      pop();
-      stroke(fillColour);
-      //long t=millis();
-      // draw all the circle fills
-      //for (Expr e : expressions) {
+
+      //stroke(fillColour);
+
       for (int eNum=0; eNum<numExprs; eNum++ ) {
         Expr e = expressions.get(eNum);
+        Log("Drawing:" + e.toString());
         push();
         //noFill();
-        fill(255, 50);
+        fill(255, 0);
         stroke(0);
         rectMode(CORNER);
         rect((eNum * width/numExprs)+inset, topInset, (width/numExprs)-(2*inset), (height-topInset)-inset);
@@ -126,19 +128,19 @@ void drawScreen() {
 
             if (e.contains(i, j)) {
               pixels[i+j*width]=fillColour;
-            }
+            } //else {pixels[i+j*width]=color(255, 0, 0);}
           }
         }
         updatePixels();
 
         e.drawCircles();
       }
+      pop();
     }
   }
 
   if (buffer != "") {
     fill(0);
-    println("Writing input at: "+symbolLine);
     text("Current input:" + "" + buffer, width/2, symbolLine);
   }
 }
@@ -149,9 +151,18 @@ void Log(String s) {
 
 void updateExpressions() {
   Parser p = new Parser();
-  Log("----------------------");
+  Log("----------------------updateExpressions");
   Log("Tokens: "+symList);
   expressions = p.parse(symList);
+  if (expressions==null) {
+    Log("Expressions null");
+  } else {
+    String s = "Expressions: ["+expressions.size()+"]";
+    for (Expr e : expressions) {
+      s=s+ "|" + e.toString()+ "|";
+    }
+    Log(s);
+  }
 }
 
 
@@ -186,11 +197,11 @@ synchronized void updateTuioObject(TuioObject obj) {
     o.y=obj.getScreenY(height);
 
     //o.setAngle(obj.getAngle());
+
+    Collections.sort(symList, comp);
+    updateExpressions();
     changed=true;
   }
-
-  Collections.sort(symList, comp);
-  updateExpressions();
 }
 
 synchronized void removeTuioObject(TuioObject obj) {
@@ -203,9 +214,9 @@ synchronized void removeTuioObject(TuioObject obj) {
     MathsSym o=objects.get(id);
     objects.remove(id);
     symList.remove(o);
+    updateExpressions();
+    changed=true;
   }
-  updateExpressions();
-  changed=true;
 }
 
 Comparator<MathsSym> comp = new Comparator<MathsSym>() {
@@ -227,15 +238,17 @@ Comparator<MathsSym> comp = new Comparator<MathsSym>() {
 
 
 
-void keyPressed() {
+synchronized void keyPressed() {
 
   // Ignore 'special' keys that we don't care about
   //if (keyCode == SHIFT || keyCode == UP || keyCode == DOWN) {
   //} else
-  
-   if (keyCode == BACKSPACE || keyCode == ENTER || key == ' ' 
-   || ((key >= 'a') && (key <= 'z')) || ((key >= 'A') && (key <= 'Z'))) {
- 
+
+  //Should use defitiniots for UNION etc.
+  if (keyCode == BACKSPACE || keyCode == ENTER || key == ' ' 
+    || ((key >= 'a') && (key <= 'z')) || ((key >= 'A') && (key <= 'Z'))
+    || (key=='^') || (key=='\\') || (key=='~') || (key=='(') || (key==')') ) {
+
     if (keyCode == BACKSPACE ) {
       //println("BACKSPACE");
       if (buffer.length()>0) {
@@ -244,6 +257,7 @@ void keyPressed() {
       }
     } else
       if (key == ENTER) { 
+
         // Insert spaces around parentheses:
         buffer=buffer.replaceAll("\\(", " ( ").replaceAll("\\)", " ) ");
 
@@ -252,43 +266,30 @@ void keyPressed() {
 
         symList = new ArrayList();
         for (int i = 0; i < splitString.length; i++) {
+          // Don't change case - the SHIFT key now works
+          String symbText = splitString[i];
+          println("." + symbText+"."+symbText.length());
+          if (symbText.length()>0) {
+            if (keySymbMap.containsKey(symbText)) { 
+              symbText = keySymbMap.get(symbText);
+            }
+            MathsSym o = new MathsSym();
 
-          // Don't change case - the SHIFT ket now works
-          String capText = splitString[i];
-          MathsSym o = new MathsSym();
-
-          /*
-      switch(capText) {
-           case "UNION": 
-           o.text=UNION;
-           break;
-           case "N": 
-           o.text=INTER;
-           break;
-           case "/": 
-           o.text=DIFF;
-           break;
-           default:  
-           o.text=capText;
-           break;
-           }*/
-          //
-          o.text=capText;
-          //o.x=200;
-          //o.y=200;
-          symList.add(o);
+            o.text=symbText;
+            symList.add(o);
+          }
         }
 
         updateExpressions();
         changed=true;
 
         // Set the buffer to empty if we dom't want to be able to edit it:
-        //buffer = "";
+        buffer = "";
       } else {    
         buffer = buffer + key;
         changed=true;
       }
 
-  Calibration.keyPressed(keyCode, key);
-   }
+    Calibration.keyPressed(keyCode, key);
+  }
 }

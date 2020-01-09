@@ -1,6 +1,6 @@
 
 final String UNION="U";
-final String INTER="inter";
+final String INTER="^";
 final String DIFF="\\";
 final String COMP="~";
 
@@ -15,4 +15,4 @@ final int inset=2;
 final int topInset=150;
 final int symbolLine=120;
 
-final int fillColour=color(0,100, 500, 100);
+final int fillColour=color(100,100, 200, 100);
