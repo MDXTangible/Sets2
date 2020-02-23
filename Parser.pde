@@ -36,12 +36,12 @@ class Parser {
     if (!tokens.hasNext()) { 
 
       //Log("At End : "+stack);
-
+accumulate(stack);
       if (stack.hasError()) { // incomplete expr
         Log("Err: ");
         return null;
       } else {
-        accumulate(stack); // why accumulate?
+        accumulate(stack); // why accumulate here? we've accumulated just above.
         return stack.stack; // ArrayList containing  all expressions
       }
     }
@@ -80,8 +80,7 @@ class Parser {
       stack.push(e);
       return parseExp(tokens, stack, depth);
     } else if (token.isOpen()) {
-      // push something?
-      // a bracket?
+      // push a bracket. Not really an expression!
       Expr e = new OpenBracket();
       stack.push(e);
       //accumulate(stack); // do we need this here?
@@ -121,6 +120,7 @@ class Parser {
       if (e2.isOpenBracket()) {
         if (e1.isComplete()) {
           stack.push(e1); 
+          accumulate(stack);
           return true;
         } else { 
           Log("Incomplete subExpr"); 

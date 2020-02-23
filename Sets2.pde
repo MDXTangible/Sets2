@@ -54,6 +54,7 @@ void setup() {
   symbs.put(10, DIFF);
 
   symbs.put(16, COMP);
+  symbs.put(20, COMP);
 
   keySymbMap.put("i", "^");
 
@@ -154,6 +155,7 @@ void updateExpressions() {
   Log("----------------------updateExpressions");
   Log("Tokens: "+symList);
   expressions = p.parse(symList);
+  Log(".");
   if (expressions==null) {
     Log("Expressions null");
   } else {
