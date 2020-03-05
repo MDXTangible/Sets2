@@ -1,8 +1,8 @@
 
-final String UNION="U";
-final String INTER="^";
-final String DIFF="\\";
-final String COMP="~";
+final String UNION="union";
+final String INTER="inter";
+final String DIFF="diff";
+final String COMP="comp";
 
 final int SHOWOBJS=18;
 

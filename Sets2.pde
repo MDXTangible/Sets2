@@ -1,8 +1,5 @@
 // TUIO Venn Diagrams
 // Bob Fields
-
-
-
 // import the TUIO library
 
 import TUIO.*;
@@ -30,48 +27,76 @@ ArrayList<Expr> expressions;
 int textPosY=50;
 int textPosX1=650;
 int textPosX2=300;
-boolean drawObjs = true;
+boolean drawObjs = false;
 
 
 PFont f;
 String buffer = "";
 
-boolean changed=true;
+boolean changed=false;
 
 void setup() {
-  size (1000, 700);
+  size (1200, 900);
 
   Calibration.setSize(width, height);
   Calibration.init(this);
 
   textSize(TEXTSIZE);
   rectMode(CENTER);
-
   textAlign(CENTER, CENTER);
 
+//Symbol exp
+//*****************************
   symbs.put(11, UNION);
-  symbs.put(5, INTER);
-  symbs.put(10, DIFF);
+    symbs.put(12, UNION);
+      symbs.put(13, UNION);
+  
+  
+  symbs.put(14, INTER);
+     symbs.put(15, INTER);
+        symbs.put(16, INTER);
+        
+        //comment
+  symbs.put(17, DIFF);
+    symbs.put(18, DIFF);
+      symbs.put(19, DIFF);
 
-  symbs.put(16, COMP);
-  symbs.put(20, COMP);
+  symbs.put(9, COMP);
+    symbs.put(10, COMP);
+      symbs.put(20, COMP);
 
   keySymbMap.put("i", "^");
 
   symbs.put(0, "A");
+    symbs.put(3, "A");
+      symbs.put(6, "A");
+  
+  
   symbs.put(1, "B");
+    symbs.put(4, "B");
+      symbs.put(7, "B");
+  
+  
   symbs.put(2, "C");
-  symbs.put(3, "D");
-  symbs.put(4, "E");
+    symbs.put(5, "C");
+      symbs.put(8, "C");
+    
 
-  //symbs.put(5, "A");
-  symbs.put(6, "B");
-  symbs.put(7, "C");
-  symbs.put(8, "D");
-  symbs.put(9, "E");
+  symbs.put(30, "("); 
+    symbs.put(31, "("); 
+      symbs.put(32, "("); 
+        symbs.put(33, "("); 
+        
+        
+  symbs.put(34, ")");
+    symbs.put(35, ")");
+      symbs.put(36, ")");
+        symbs.put(37, ")");
+        
+        
+         println(""+ symbs);
+//*****************************
 
-  symbs.put(30, "("); // not used yet!
-  symbs.put(31, ")");
 
   tuioClient  = new TuioProcessing(this);
 }
